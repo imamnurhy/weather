@@ -6,7 +6,7 @@ part 'exceptions.dart';
 abstract class ResponseHandle {
   handleResponse(http.Response response) {
     Map responseBody = json.decode(response.body);
-    String message = responseBody['message'] ?? '-';
+    dynamic message = responseBody['message'] ?? '-';
     switch (response.statusCode) {
       case 200:
         return response;
