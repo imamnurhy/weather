@@ -1,5 +1,8 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:weather/data/constant.dart';
@@ -35,6 +38,40 @@ class _Body extends StatefulWidget {
 }
 
 class __BodyState extends State<_Body> {
+  Position? position;
+  String lat = '-6.3525141';
+  String lon = '106.6955019';
+
+  @override
+  void initState() {
+    _checkPermission();
+
+    super.initState();
+  }
+
+  void _getCurrentLocation() async {
+    position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+
+    setState(() {
+      lat = position?.latitude.toString() ?? lat;
+      lon = position?.longitude.toString() ?? lon;
+    });
+  }
+
+  void _checkPermission() async {
+    final permission = await Geolocator.checkPermission();
+
+    if (permission == LocationPermission.always) {
+      _getCurrentLocation();
+    } else {
+      final permission = await Geolocator.requestPermission();
+
+      if (permission == LocationPermission.always) {
+        _getCurrentLocation();
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -42,15 +79,24 @@ class __BodyState extends State<_Body> {
         backgroundColor: primaryColor,
         body: SingleChildScrollView(
           child: Column(
-            children: const [
+            children: [
               // Info Weather now
-              _WeatherCurrent(),
+              _WeatherCurrent(
+                latitude: lat,
+                longitude: lon,
+              ),
 
               // Detail Weather
-              _WeatherDetail(),
+              _WeatherDetail(
+                latitude: lat,
+                longitude: lon,
+              ),
 
               // Weather Forecast
-              _WeatherForecast(),
+              _WeatherForecast(
+                latitude: lat,
+                longitude: lon,
+              ),
             ],
           ),
         ),
@@ -60,7 +106,10 @@ class __BodyState extends State<_Body> {
 }
 
 class _WeatherCurrent extends StatefulWidget {
-  const _WeatherCurrent({Key? key}) : super(key: key);
+  final String latitude;
+  final String longitude;
+
+  const _WeatherCurrent({Key? key, required this.latitude, required this.longitude}) : super(key: key);
 
   @override
   State<_WeatherCurrent> createState() => __WeatherCurrentState();
@@ -74,7 +123,7 @@ class __WeatherCurrentState extends State<_WeatherCurrent> {
       child: Container(
         decoration: BoxDecoration(color: accentColor, borderRadius: BorderRadius.circular(25)),
         child: BlocBuilder<WeatherBloc, WeatherState>(
-          bloc: WeatherBloc()..add(GetWeather('-6.352526134081219', '106.69551196025492')),
+          bloc: WeatherBloc()..add(GetWeather(widget.latitude, widget.longitude)),
           builder: (context, state) {
             if (state is WeatherLoading) {
               return const Center(child: CircularProgressIndicator());
@@ -189,7 +238,10 @@ class __WeatherCurrentState extends State<_WeatherCurrent> {
 }
 
 class _WeatherDetail extends StatefulWidget {
-  const _WeatherDetail({Key? key}) : super(key: key);
+  final String latitude;
+  final String longitude;
+
+  const _WeatherDetail({Key? key, required this.latitude, required this.longitude}) : super(key: key);
 
   @override
   State<_WeatherDetail> createState() => __WeatherDetailState();
@@ -205,7 +257,7 @@ class __WeatherDetailState extends State<_WeatherDetail> {
         child: Padding(
           padding: const EdgeInsets.all(10.0),
           child: BlocBuilder<WeatherBloc, WeatherState>(
-            bloc: WeatherBloc()..add(GetWeather('-6.352526134081219', '106.69551196025492')),
+            bloc: WeatherBloc()..add(GetWeather(widget.latitude, widget.longitude)),
             builder: (context, state) {
               if (state is WeatherLoading) {
                 return const Center(
@@ -297,7 +349,10 @@ class __WeatherDetailState extends State<_WeatherDetail> {
 }
 
 class _WeatherForecast extends StatefulWidget {
-  const _WeatherForecast({Key? key}) : super(key: key);
+  final String latitude;
+  final String longitude;
+
+  const _WeatherForecast({Key? key, required this.latitude, required this.longitude}) : super(key: key);
 
   @override
   State<_WeatherForecast> createState() => __WeatherForecastState();
@@ -311,7 +366,7 @@ class __WeatherForecastState extends State<_WeatherForecast> {
       height: screensize.height / 4.5,
       width: double.infinity,
       child: BlocBuilder<ForecastWeatherBloc, ForecastWeatherState>(
-        bloc: ForecastWeatherBloc()..add(GetForecastWeather('-6.352526134081219', '106.69551196025492')),
+        bloc: ForecastWeatherBloc()..add(GetForecastWeather(widget.latitude, widget.longitude)),
         builder: (context, state) {
           if (state is ForecastWeatherLoading) {
             return const Center(
