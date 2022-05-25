@@ -9,3 +9,9 @@ class GetWeather extends WeatherEvent {
 
   GetWeather(this.lat, this.long);
 }
+
+class GetWeatherWithRegion extends WeatherEvent {
+  final String region;
+
+  GetWeatherWithRegion(this.region);
+}

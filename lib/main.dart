@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'app/page/weather_seccond_page.dart';
 import 'app/page/weather_page.dart';
 
 void main() async {
@@ -18,7 +19,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const WeatherPage(),
+      home: const WeatherSeccondPage(),
     );
   }
 }

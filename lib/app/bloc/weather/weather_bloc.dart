@@ -19,5 +19,14 @@ class WeatherBloc extends Bloc<WeatherEvent, WeatherState> {
         emit(WeatherError(e.toString()));
       }
     });
+    on<GetWeatherWithRegion>((event, emit) async {
+      emit(WeatherLoading());
+      try {
+        final weatherModel = await weatherRepository.forecastWeatherWithRegion(event.region);
+        emit(WeatherLoaded(weatherModel));
+      } catch (e) {
+        emit(WeatherError(e.toString()));
+      }
+    });
   }
 }
